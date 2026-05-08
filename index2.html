@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Raaj Singh — 0DTE & Futures Trading</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet"/>
+<style>
+:root {
+  --bg:    #06070a;
+  --bg2:   #080d18;
+  --bg3:   #0a1220;
+  --ink:   #d8eaf8;
+  --dim:   #3a5a70;
+  --edge:  #0e2035;
+  --gold:  #5ab4f0;
+  --gold2: #3a8abf;
+  --green: #2a8a5a;
+  --red:   #8a3040;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{
+  background:var(--bg);
+  color:var(--ink);
+  font-family:'DM Mono',monospace;
+  font-weight:300;
+  overflow-x:hidden;
+}
+#bg-canvas{position:fixed;inset:0;z-index:0;pointer-events:none;opacity:0.55;}
+
+/* NAV */
+nav{
+  position:fixed;top:0;left:0;right:0;z-index:100;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:22px 60px;
+  border-bottom:1px solid var(--edge);
+  background:rgba(6,7,10,0.92);
+  backdrop-filter:blur(12px);
+}
+.nav-logo{font-family:'DM Serif Display',serif;font-size:18px;color:var(--ink);letter-spacing:1px;}
+.nav-logo span{color:var(--gold);font-style:italic;}
+.nav-links{display:flex;gap:36px;align-items:center;}
+.nav-links a{font-size:9px;letter-spacing:3px;text-transform:uppercase;color:var(--dim);text-decoration:none;transition:color 0.3s;}
+.nav-links a:hover{color:var(--gold);}
+.nav-cta{border:1px solid var(--gold);color:var(--gold);padding:9px 22px;font-size:9px;letter-spacing:3px;text-decoration:none;text-transform:uppercase;transition:all 0.3s;}
+.nav-cta:hover{background:var(--gold);color:var(--bg);}
+
+/* TICKER */
+#ticker{position:relative;z-index:10;margin-top:66px;background:var(--bg2);border-bottom:1px solid var(--edge);height:34px;display:flex;align-items:center;overflow:hidden;}
+#tick-inner{display:flex;animation:scroll 24s linear infinite;white-space:nowrap;}
+.ti{font-size:10px;letter-spacing:2px;padding:0 24px;color:var(--dim);}
+.ti.up{color:var(--green);}.ti.dn{color:var(--red);}
+@keyframes scroll{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+
+/* HERO */
+#hero{
+  position:relative;z-index:1;
+  min-height:100vh;
+  display:grid;grid-template-columns:1fr 1fr;
+  align-items:center;
+  padding:0 60px;
+  border-bottom:1px solid var(--edge);
+}
+.hero-left{padding-right:60px;}
+.hero-tag{font-size:9px;letter-spacing:5px;text-transform:uppercase;color:var(--gold2);margin-bottom:28px;display:flex;align-items:center;gap:12px;}
+.hero-tag::before{content:'';display:block;width:32px;height:1px;background:var(--gold2);}
+h1.hero-title{font-family:'DM Serif Display',serif;font-size:clamp(52px,7vw,88px);line-height:1.0;font-weight:400;color:#eaf4ff;max-width:600px;margin-bottom:32px;}
+h1.hero-title em{color:var(--gold);font-style:italic;}
+.hero-body{font-size:12px;letter-spacing:1px;line-height:2.2;color:var(--dim);max-width:400px;margin-bottom:44px;}
+.hero-body strong{color:var(--ink);font-weight:500;}
+.hero-actions{display:flex;gap:20px;align-items:center;flex-wrap:wrap;}
+.btn-primary{background:var(--gold);color:var(--bg);padding:14px 36px;font-family:'DM Mono',monospace;font-size:10px;letter-spacing:3px;text-transform:uppercase;font-weight:500;border:none;cursor:pointer;text-decoration:none;display:inline-block;transition:opacity 0.3s;}
+.btn-primary:hover{opacity:0.85;}
+.btn-ghost{border:1px solid var(--edge);color:var(--dim);padding:14px 36px;font-size:10px;letter-spacing:3px;text-transform:uppercase;text-decoration:none;display:inline-block;transition:all 0.3s;}
+.btn-ghost:hover{border-color:var(--gold);color:var(--gold);}
+.hero-eq{position:absolute;right:60px;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;gap:16px;opacity:0.22;}
+.eq-line{font-size:11px;color:var(--gold);letter-spacing:1px;border-left:2px solid var(--edge);padding-left:14px;}
+
+/* METRICS */
+#metrics{position:relative;z-index:1;display:grid;grid-template-columns:repeat(4,1fr);border-bottom:1px solid var(--edge);}
+.metric{padding:40px 48px;border-right:1px solid var(--edge);}
+.metric:last-child{border-right:none;}
+.metric-num{font-family:'DM Serif Display',serif;font-size:42px;color:var(--gold);line-height:1;margin-bottom:8px;}
+.metric-label{font-size:9px;letter-spacing:3px;text-transform:uppercase;color:var(--dim);}
+
+/* SECTIONS */
+section{position:relative;z-index:1;padding:100px 60px;border-bottom:1px solid var(--edge);}
+.section-tag{font-size:9px;letter-spacing:5px;text-transform:uppercase;color:var(--dim);margin-bottom:16px;}
+h2.section-title{font-family:'DM Serif Display',serif;font-size:clamp(36px,5vw,60px);font-weight:400;line-height:1.1;color:#eaf4ff;margin-bottom:20px;}
+h2.section-title em{color:var(--gold);font-style:italic;}
+.section-body{font-size:11px;letter-spacing:1px;line-height:2.2;color:var(--dim);max-width:480px;margin-bottom:60px;}
+
+/* FEATURES GRID */
+.features-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--edge);border:1px solid var(--edge);}
+.feature{background:var(--bg2);padding:40px 36px;transition:background 0.3s;}
+.feature:hover{background:var(--bg3);}
+.feature-icon{font-size:10px;letter-spacing:4px;text-transform:uppercase;color:var(--gold2);margin-bottom:20px;}
+.feature-title{font-family:'DM Serif Display',serif;font-size:22px;font-weight:400;color:#d8eaf8;margin-bottom:14px;line-height:1.2;}
+.feature-body{font-size:10px;letter-spacing:0.5px;line-height:2;color:var(--dim);}
+
+/* MATH SPLIT */
+#math-section{position:relative;z-index:1;display:grid;grid-template-columns:1fr 1fr;border-bottom:1px solid var(--edge);}
+.math-left{padding:100px 60px;border-right:1px solid var(--edge);}
+.math-right{padding:60px 48px;background:var(--bg2);font-size:12px;letter-spacing:1px;line-height:2.8;color:var(--dim);}
+.math-right .formula{color:var(--gold);padding:10px 0;border-bottom:1px solid var(--edge);font-size:13px;}
+.math-right .formula:last-child{border-bottom:none;}
+.formula-label{font-size:8px;letter-spacing:3px;color:var(--dim);text-transform:uppercase;}
+
+/* PROCESS */
+.process-steps{display:flex;flex-direction:column;}
+.step{display:grid;grid-template-columns:80px 1fr;border-bottom:1px solid var(--edge);padding:36px 0;}
+.step:last-child{border-bottom:none;}
+.step-num{font-family:'DM Serif Display',serif;font-size:36px;color:var(--edge);line-height:1;padding-top:4px;}
+.step-title{font-family:'DM Serif Display',serif;font-size:22px;color:#d8eaf8;margin-bottom:10px;}
+.step-body{font-size:10px;color:var(--dim);line-height:2;letter-spacing:0.5px;}
+
+/* TESTIMONIALS */
+.testimonials{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--edge);border:1px solid var(--edge);}
+.testi{background:var(--bg2);padding:36px 32px;}
+.testi-quote{font-family:'DM Serif Display',serif;font-size:16px;font-style:italic;color:#c8ddf0;line-height:1.6;margin-bottom:24px;}
+.testi-name{font-size:9px;letter-spacing:3px;text-transform:uppercase;color:var(--gold2);}
+.testi-role{font-size:9px;letter-spacing:1px;color:var(--dim);margin-top:4px;}
+
+/* PRICING */
+#pricing{position:relative;z-index:1;padding:100px 60px;border-bottom:1px solid var(--edge);display:flex;flex-direction:column;align-items:center;text-align:center;}
+.pricing-card{width:100%;max-width:520px;margin-top:52px;}
+.card-inner{border:1px solid var(--gold);padding:52px 48px;background:var(--bg2);position:relative;}
+.card-badge{position:absolute;top:-1px;left:48px;background:var(--gold);color:var(--bg);font-size:9px;letter-spacing:3px;text-transform:uppercase;padding:5px 14px;font-weight:500;}
+.card-name{font-family:'DM Serif Display',serif;font-size:22px;color:#eaf4ff;margin-top:20px;margin-bottom:4px;}
+.price-row{display:flex;align-items:baseline;gap:8px;margin:16px 0 8px;}
+.price-num{font-family:'DM Serif Display',serif;font-size:80px;color:#eaf4ff;line-height:1;}
+.price-per{font-size:11px;color:var(--dim);letter-spacing:2px;}
+.card-period{font-size:9px;letter-spacing:2px;color:var(--dim);margin-bottom:36px;}
+.card-features{display:flex;flex-direction:column;gap:14px;margin-bottom:40px;text-align:left;}
+.cf{display:flex;align-items:flex-start;gap:14px;font-size:11px;letter-spacing:0.5px;color:var(--ink);}
+.cf::before{content:'→';color:var(--gold);flex-shrink:0;}
+.card-cta{display:block;text-align:center;text-decoration:none;background:var(--gold);color:var(--bg);padding:15px;font-family:'DM Mono',monospace;font-size:10px;letter-spacing:3px;text-transform:uppercase;font-weight:500;transition:opacity 0.3s;}
+.card-cta:hover{opacity:0.85;}
+.card-note{font-size:9px;letter-spacing:1px;color:var(--dim);text-align:center;margin-top:14px;}
+.card-pillars{border:1px solid var(--edge);border-top:none;padding:22px 48px;background:var(--bg3);display:flex;gap:24px;justify-content:center;flex-wrap:wrap;}
+.pillar-tag{font-size:9px;letter-spacing:2px;color:var(--dim);text-transform:uppercase;}
+
+/* DISCLAIMER */
+#disclaimer{position:relative;z-index:1;padding:36px 60px;background:var(--bg2);border-bottom:1px solid var(--edge);}
+.disc{font-size:9px;letter-spacing:0.8px;line-height:2.2;color:var(--dim);max-width:860px;}
+
+/* FOOTER */
+footer{position:relative;z-index:1;padding:44px 60px;display:flex;justify-content:space-between;align-items:center;border-top:1px solid var(--edge);}
+.footer-logo{font-family:'DM Serif Display',serif;font-size:16px;color:var(--dim);}
+.footer-links{display:flex;gap:28px;}
+.footer-links a{font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--dim);text-decoration:none;transition:color 0.3s;}
+.footer-links a:hover{color:var(--gold);}
+.footer-copy{font-size:9px;color:var(--edge);letter-spacing:1px;}
+
+/* ANIMATIONS */
+@keyframes fadeUp{from{opacity:0;transform:translateY(24px);}to{opacity:1;transform:translateY(0);}}
+.fu{opacity:0;animation:fadeUp 0.8s ease forwards;}
+.d1{animation-delay:0.1s;}.d2{animation-delay:0.25s;}.d3{animation-delay:0.4s;}.d4{animation-delay:0.6s;}
+
+/* MOBILE */
+@media(max-width:768px){
+  nav{padding:18px 24px;}
+  #hero{grid-template-columns:1fr;padding:60px 24px 40px;}
+  .hero-eq{display:none;}
+  #metrics{grid-template-columns:repeat(2,1fr);}
+  .metric{padding:28px 24px;}
+  section{padding:64px 24px;}
+  .features-grid{grid-template-columns:1fr;}
+  #math-section{grid-template-columns:1fr;}
+  .math-left{padding:64px 24px;border-right:none;border-bottom:1px solid var(--edge);}
+  .math-right{padding:40px 24px;}
+  .testimonials{grid-template-columns:1fr;}
+  #pricing{padding:64px 24px;}
+  .card-inner{padding:40px 28px;}
+  .card-pillars{padding:20px 28px;}
+  footer{flex-direction:column;gap:20px;text-align:center;padding:36px 24px;}
+  .footer-links{justify-content:center;}
+}
+</style>
+</head>
+<body>
+<canvas id="bg-canvas"></canvas>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo">NQ <span>Avant</span></div>
+  <div class="nav-links">
+    <a href="#about">About</a>
+    <a href="#features">What You Get</a>
+    <a href="#process">How It Works</a>
+    <a href="https://buymeacoffee.com/nqavant/membership" target="_blank" class="nav-cta">Join — $20/mo</a>
+  </div>
+</nav>
+
+<!-- TICKER -->
+<div id="ticker">
+  <div id="tick-inner">
+    <span class="ti up">ES  +0.41%</span><span class="ti dn">NQ  −0.18%</span><span class="ti up">CL  +1.08%</span><span class="ti up">GC  +0.36%</span><span class="ti dn">ZB  −0.22%</span><span class="ti up">YM  +0.53%</span><span class="ti dn">0DTE SPY  −0.09%</span><span class="ti up">RTY  +0.29%</span><span class="ti up">QQQ  +0.44%</span><span class="ti dn">NG  −0.37%</span><span class="ti up">SI  +0.88%</span>
+    <span class="ti up">ES  +0.41%</span><span class="ti dn">NQ  −0.18%</span><span class="ti up">CL  +1.08%</span><span class="ti up">GC  +0.36%</span><span class="ti dn">ZB  −0.22%</span><span class="ti up">YM  +0.53%</span><span class="ti dn">0DTE SPY  −0.09%</span><span class="ti up">RTY  +0.29%</span><span class="ti up">QQQ  +0.44%</span><span class="ti dn">NG  −0.37%</span><span class="ti up">SI  +0.88%</span>
+  </div>
+</div>
+
+<!-- HERO -->
+<section id="hero">
+  <div class="hero-left">
+    <div class="hero-tag fu d1">0DTE Options & Futures Scalps</div>
+    <h1 class="hero-title fu d2">Where math<br>meets the <em>market.</em></h1>
+    <p class="hero-body fu d3">
+      Started trading at <strong>15</strong>. Took the losses. Built the framework.
+      Now at <strong>18</strong> — multiple five-figure payouts trading futures and 0DTE options.
+      Live calls, precise entries & exits, and the macro intelligence that drives every trade.
+    </p>
+    <div class="hero-actions fu d4">
+      <a href="https://buymeacoffee.com/nqavant/membership" target="_blank" class="btn-primary">Join Now — $20/month</a>
+      <a href="#features" class="btn-ghost">See What's Included</a>
+    </div>
+  </div>
+  <div class="hero-eq">
+    <div class="eq-line">α = Rp − [Rf + β(Rm−Rf)]</div>
+    <div class="eq-line">VaR = μ − zσ√t</div>
+    <div class="eq-line">Sharpe = (Rp−Rf) / σp</div>
+    <div class="eq-line">Kelly f* = (bp−q) / b</div>
+    <div class="eq-line">Δ = ∂V/∂S &nbsp;|&nbsp; Γ = ∂²V/∂S²</div>
+  </div>
+</section>
+
+<!-- METRICS -->
+<div id="metrics">
+  <div class="metric">
+    <div class="metric-num">18</div>
+    <div class="metric-label">Age — self-taught</div>
+  </div>
+  <div class="metric">
+    <div class="metric-num">Live</div>
+    <div class="metric-label">0DTE & futures calls</div>
+  </div>
+  <div class="metric">
+    <div class="metric-num">5-Fig</div>
+    <div class="metric-label">Multiple payouts this year</div>
+  </div>
+  <div class="metric">
+    <div class="metric-num">$20</div>
+    <div class="metric-label">Flat monthly fee</div>
+  </div>
+</div>
+
+<!-- FEATURES -->
+<section id="features">
+  <div class="section-tag">What you get</div>
+  <h2 class="section-title">Real calls.<br><em>Real edge.</em></h2>
+  <p class="section-body">Everything inside the membership — no upsells, no fluff.</p>
+  <div class="features-grid">
+    <div class="feature">
+      <div class="feature-icon">01 — Signals</div>
+      <div class="feature-title">0DTE Options Scalps</div>
+      <div class="feature-body">Same-day options calls with precise entries and exits. Gamma exposure, pinning levels, and intraday flow — no guessing, just structure.</div>
+    </div>
+    <div class="feature">
+      <div class="feature-icon">02 — Signals</div>
+      <div class="feature-title">Futures Scalps</div>
+      <div class="feature-body">Live futures calls on ES, NQ, and more — driven by order flow, auction market theory, and real-time tape reading.</div>
+    </div>
+    <div class="feature">
+      <div class="feature-icon">03 — Access</div>
+      <div class="feature-title">Live Calls Upon Desire</div>
+      <div class="feature-body">Direct live session access when the setup is there. You hear the thinking in real time — not a lagging alert, not a recap.</div>
+    </div>
+    <div class="feature">
+      <div class="feature-icon">04 — Execution</div>
+      <div class="feature-title">Entries & Exits</div>
+      <div class="feature-body">Every call comes with the full picture: entry level, stop placement, target, and the reasoning. No black box. You see the framework in action.</div>
+    </div>
+    <div class="feature">
+      <div class="feature-icon">05 — Macro</div>
+      <div class="feature-title">Daily Market Context</div>
+      <div class="feature-body">QE/QT conditions, dealer exposure, and key structural levels before every session. Know the bias before the open.</div>
+    </div>
+    <div class="feature">
+      <div class="feature-icon">06 — Community</div>
+      <div class="feature-title">Private Community</div>
+      <div class="feature-body">A tight group of serious traders. Real discussion, real accountability, and the kind of signal-to-noise ratio that's impossible in public groups.</div>
+    </div>
+  </div>
+</section>
+
+<!-- MATH SECTION -->
+<div id="math-section" id="about">
+  <div class="math-left">
+    <div class="section-tag">The framework</div>
+    <h2 class="section-title">Macro<br>down to<br><em>tick.</em></h2>
+    <p class="section-body" style="margin-bottom:16px;">Every trade starts at the macro level — liquidity, dealer positioning, auction structure — and flows down to precise order flow execution.</p>
+    <p class="section-body" style="margin-bottom:0;">This isn't indicators. This isn't patterns. This is the math and structure that professionals use.</p>
+  </div>
+  <div class="math-right">
+    <div class="formula">
+      <div class="formula-label">Expected value</div>
+      E[R] = Rf + β(Rm − Rf)
+    </div>
+    <div class="formula">
+      <div class="formula-label">Position sizing</div>
+      f* = (bp − q) / b
+    </div>
+    <div class="formula">
+      <div class="formula-label">Risk-adjusted return</div>
+      Sharpe = (Rp − Rf) / σp
+    </div>
+    <div class="formula">
+      <div class="formula-label">Delta & gamma</div>
+      Δ = ∂V/∂S &nbsp;&nbsp; Γ = ∂²V/∂S²
+    </div>
+    <div class="formula">
+      <div class="formula-label">Value at risk</div>
+      VaR₉₅ = μ − 1.645σ√t
+    </div>
+    <div class="formula">
+      <div class="formula-label">Price dynamics</div>
+      dS = μS dt + σS dW
+    </div>
+  </div>
+</div>
+
+<!-- PROCESS -->
+<section id="process">
+  <div class="section-tag">How it works</div>
+  <h2 class="section-title">Simple.<br><em>Flat fee.</em></h2>
+  <p class="section-body">No tiers, no upsells. Join, get access, trade smarter.</p>
+  <div class="process-steps">
+    <div class="step">
+      <div class="step-num">01</div>
+      <div>
+        <div class="step-title">Join for $20/month</div>
+        <div class="step-body">One flat fee. Instant access to the private community, live calls, and everything inside. Cancel any time — no contracts, no lock-in.</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">02</div>
+      <div>
+        <div class="step-title">Get the Daily Bias</div>
+        <div class="step-body">Every session starts with macro context — liquidity conditions, dealer exposure, and the key structural levels that matter. Know the environment before the open.</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">03</div>
+      <div>
+        <div class="step-title">Follow Live Calls</div>
+        <div class="step-body">0DTE scalps and futures calls in real time — entries, exits, and the live reasoning. When the setup is there, you get it live. No delays.</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">04</div>
+      <div>
+        <div class="step-title">Build the Framework</div>
+        <div class="step-body">Over time, watching the framework applied live teaches you to see the market the same way. The goal isn't dependence — it's developing your own edge.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TESTIMONIALS -->
+<section>
+  <div class="section-tag">Members</div>
+  <h2 class="section-title">From the <em>desk.</em></h2>
+  <p class="section-body" style="margin-bottom:48px;">What traders say after joining.</p>
+  <div class="testimonials">
+    <div class="testi">
+      <div class="testi-quote">"The live calls completely changed how I approach 0DTE. I stopped chasing moves and started waiting for the structure to confirm."</div>
+      <div class="testi-name">D. Harrington</div>
+      <div class="testi-role">0DTE Options Trader</div>
+    </div>
+    <div class="testi">
+      <div class="testi-quote">"Getting the macro context before the open is the thing I didn't know I was missing. It reframes everything about how I read intraday price action."</div>
+      <div class="testi-name">M. Okonkwo</div>
+      <div class="testi-role">ES Futures Trader</div>
+    </div>
+    <div class="testi">
+      <div class="testi-quote">"$20/month for live calls and real reasoning behind every trade. The signal-to-noise ratio is better than anything I've paid ten times as much for."</div>
+      <div class="testi-name">S. Johansson</div>
+      <div class="testi-role">NQ Futures & Options Trader</div>
+    </div>
+  </div>
+</section>
+
+<!-- PRICING -->
+<section id="pricing">
+  <div class="section-tag">Membership</div>
+  <h2 class="section-title">One plan.<br><em>Everything included.</em></h2>
+  <p class="section-body" style="text-align:center;margin:0 auto;">Flat fee. No tiers. No upsells. Less than the cost of one bad trade.</p>
+  <div class="pricing-card">
+    <div class="card-inner">
+      <div class="card-badge">Flat Fee Membership</div>
+      <div class="card-name">Full Access</div>
+      <div class="price-row">
+        <span class="price-num">$20</span>
+        <span class="price-per">/month</span>
+      </div>
+      <div class="card-period">Cancel anytime — no contracts</div>
+      <div class="card-features">
+        <div class="cf">0DTE Options & Futures Scalps</div>
+        <div class="cf">Precise Entries & Exits on every call</div>
+        <div class="cf">Live calls upon desire</div>
+        <div class="cf">Daily macro & market context</div>
+        <div class="cf">Order flow & structure breakdowns</div>
+        <div class="cf">Private community access</div>
+      </div>
+      <a href="https://buymeacoffee.com/nqavant/membership" target="_blank" class="card-cta">Join Now — $20/month →</a>
+      <p class="card-note">Powered by Buy Me a Coffee · Instant access · Cancel anytime</p>
+    </div>
+    <div class="card-pillars">
+      <span class="pillar-tag">0DTE Options</span>
+      <span style="color:var(--edge);">·</span>
+      <span class="pillar-tag">Futures Scalps</span>
+      <span style="color:var(--edge);">·</span>
+      <span class="pillar-tag">Order Flow</span>
+      <span style="color:var(--edge);">·</span>
+      <span class="pillar-tag">Macro Framework</span>
+    </div>
+  </div>
+</section>
+
+<!-- DISCLAIMER -->
+<div id="disclaimer">
+  <p class="disc"><strong style="color:var(--dim);">Risk Disclosure:</strong> Trading futures and options involves substantial risk of loss and is not appropriate for all investors. Past performance, including five-figure payouts referenced on this site, is not indicative of future results. All trade signals and content are provided for informational and educational purposes only and do not constitute financial advice. You are solely responsible for your own trading decisions. Never trade with capital you cannot afford to lose.</p>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-logo">NQ Avant</div>
+  <div class="footer-links">
+    <a href="#features">Signals</a>
+    <a href="#process">How It Works</a>
+    <a href="https://buymeacoffee.com/nqavant/membership" target="_blank">Join</a>
+  </div>
+  <div class="footer-copy">© 2025 Raaj Singh. All rights reserved.</div>
+</footer>
+
+<script>
+const canvas = document.getElementById('bg-canvas');
+const ctx = canvas.getContext('2d');
+let W, H, t = 0;
+function resize() { W = canvas.width = window.innerWidth; H = canvas.height = window.innerHeight; }
+resize(); window.addEventListener('resize', resize);
+
+function draw() {
+  ctx.clearRect(0,0,W,H);
+  const cw=60, rh=60;
+  const cols=Math.ceil(W/cw)+1, rows=Math.ceil(H/rh)+1;
+  ctx.strokeStyle='rgba(14,32,53,0.8)'; ctx.lineWidth=0.5;
+  for(let c=0;c<=cols;c++){ctx.beginPath();ctx.moveTo(c*cw,0);ctx.lineTo(c*cw,H);ctx.stroke();}
+  for(let r=0;r<=rows;r++){ctx.beginPath();ctx.moveTo(0,r*rh);ctx.lineTo(W,r*rh);ctx.stroke();}
+  for(let c=0;c<=cols;c++){
+    for(let r=0;r<=rows;r++){
+      const v=Math.sin(t*0.03+c*0.6+r*0.8);
+      if(v>0.65){
+        const a=(v-0.65)/0.35*0.45;
+        ctx.fillStyle=`rgba(90,180,240,${a})`;
+        ctx.beginPath();ctx.arc(c*cw,r*rh,2,0,Math.PI*2);ctx.fill();
+      }
+    }
+  }
+  for(let i=0;i<3;i++){
+    const startX=(t*0.7+i*240)%(W+100)-50;
+    const y=120+i*140;
+    ctx.strokeStyle='rgba(90,180,240,0.05)';ctx.lineWidth=1;
+    ctx.beginPath();
+    for(let x=startX;x<startX+280;x++){
+      const yy=y+Math.sin((x+t*2)*0.022)*28;
+      x===startX?ctx.moveTo(x,yy):ctx.lineTo(x,yy);
+    }
+    ctx.stroke();
+  }
+  t++; requestAnimationFrame(draw);
+}
+draw();
+</script>
+</body>
+</html>
